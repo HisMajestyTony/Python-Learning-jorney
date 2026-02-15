@@ -1,0 +1,15 @@
+matrix = [
+    [1,2],
+    [3,4]
+]
+
+new_matrix = [
+    [0,0],
+    [0,0]
+]
+
+for i in range(2):
+    for j in range(2):
+        new_matrix[j][i] = matrix[i][j]
+
+print(new_matrix)
