@@ -1,0 +1,22 @@
+numbers = [4, 7, 2, 9, 4, 2, 10, 15, 3]
+
+sorted(numbers)
+end_result = {}
+
+only_evens = []
+for number in numbers :
+    if number % 2 == 0 :
+        only_evens.append(number)
+        end_result.update({number:"Even"})
+    else :
+        end_result.update({number:"Odd"})
+
+
+evens_as_set = set(only_evens)
+print(evens_as_set)
+print(end_result)
+
+
+
+
+
