@@ -1,12 +1,12 @@
 from datetime import datetime
-import json
+
 habits = []
 name = None
 created_date = ""
 filename = "Habits.txt"
 
 
-def add_habbit(habits ,name, created_date):
+def add_habit(habits, name, created_date):
     active = True
     
 
