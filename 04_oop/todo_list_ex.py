@@ -1,36 +1,55 @@
 class Task:
     def __init__(self, title):
-        self.title = title
-        self.done = False
+        self._title = title
+        self._done = False
+
+    def get_title(self):
+        return self._title
+
+    def set_title(self, new_title):
+        if not new_title.strip():
+            return  False
+        else:
+            self._title = new_title
+            return True
+    def is_done(self):
+        return self._done
 
 
     def mark_done(self):
-        self.done = True
+        self._done = True
 
     def display(self):
-        if self.done:
-           return f'[X] {self.title}'
+        if self._done:
+           return f'[X] {self._title}'
         else:
-            return  f'[ ] {self.title}'
+            return  f'[ ] {self._title}'
 
-
-
-
-
+    def toggle(self):
+        self._done = not self._done
 
 
 
 class TodoList:
     def __init__(self):
-        self.tasks = []   # plural is clearer
+        self.tasks: list[Task] = []   # plural is clearer
 
     def add_task(self, title):
         task = Task(title)
         self.tasks.append(task)
 
     def show_all(self):
+        if not self.tasks:
+            print("No tasks yet")
+            return
         for i, t in enumerate(self.tasks):
             print(f"{i}: {t.display()}")
+
+    def toggle_task(self, index):
+        if 0 <= index < len(self.tasks):
+            self.tasks[index].toggle()
+            return True
+        return False
 
 
     def mark_task_done(self, index):
@@ -48,8 +67,44 @@ class TodoList:
     def save_to_file(self,filename):
         with open(filename , 'w', encoding ="utf-8") as f:
             for task in self.tasks:
-                done_flag = '1' if task.done else "0"
-                f.write(f"{done_flag}|{task.title}\n")
+                done_flag = '1' if task.is_done() else "0"
+                f.write(f"{done_flag}|{task.get_title()}\n")
+
+    def show_completed(self):
+        if not self.tasks:
+            print("No tasks added.")
+            return
+
+        completed = []
+
+        for task in self.tasks:
+            if task.is_done():
+                completed.append(task)
+
+        if not completed:
+            print("No completed tasks.")
+            return
+
+        for task in completed:
+            print(task.display())
+
+
+    def show_pending(self):
+        if not self.tasks:
+            return
+
+        pending = []
+
+        for task in self.tasks:
+            if not task.is_done():
+                pending.append(task)
+
+        if not pending:
+            print("No tasks are pending")
+            return
+
+        for task in pending:
+            print(task.display())
 
 
     def load_from_file(self,filename):
@@ -70,6 +125,27 @@ class TodoList:
         except FileNotFoundError:
             print("No file was found")
 
+    def edit_title(self, index , new_title):
+
+        if not new_title.strip():
+
+            return False
+        if 0 <= index < len(self.tasks):
+            return self.tasks[index].set_title(new_title)
+
+        else :
+            return False
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -87,6 +163,10 @@ def main():
         print("5. Exit")
         print("6. Save")
         print("7. Load")
+        print("8. Show completed")
+        print("9. Show pending")
+        print("10. Edit task title")
+        print("11. Toggle")
 
         choice = input("Choose option: ").strip()
 
@@ -101,12 +181,20 @@ def main():
             todo.show_all()
 
         elif choice == "3":
-            index = int(input("Please enter your index"))
-            todo.mark_task_done(index)
+            try :
+                index = int(input("Please enter your index"))
+                todo.mark_task_done(index)
+
+            except ValueError:
+                print("Index must be a number")
 
         elif choice == "4":
-            index = int(input("Please enter your index"))
-            todo.remove_task(index)
+
+            try:
+                index = int(input("Please enter your index"))
+                todo.remove_task(index)
+            except ValueError:
+                print("Invalid input")
 
         elif choice == "6":
             todo.save_to_file("tasks.txt")
@@ -116,10 +204,46 @@ def main():
             todo.load_from_file("tasks.txt")
             print("Loaded.")
 
+        elif choice == "8":
+            todo.show_completed()
+
+
+        elif choice == "9":
+            todo.show_pending()
+
+        elif choice == "10":
+
+            try:
+                index = int(input("Please enter the index of the title you wish to update: "))
+                new_title = input("Please enter the new title: ")
+
+                result = todo.edit_title(index, new_title)
+
+                if result:
+                    print("Task updated successfully.")
+                else:
+                    print("Update failed.")
+
+            except ValueError:
+                print("Index must be a number.")
+
+
+
+
 
         elif choice == "5":
-
+            todo.save_to_file("tasks.txt")
+            print("Goodbye")
             break
+
+        elif choice == "11":
+            index = int(input("Please enter the index you wish to toggle:"))
+            todo.toggle(index)
+
+
+
+
+
 
         else:
             print("Invalid option")
