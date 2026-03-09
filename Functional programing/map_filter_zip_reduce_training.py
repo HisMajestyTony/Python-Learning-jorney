@@ -36,13 +36,16 @@ prices = [19.99, 5, 3.5]
 prices_map = list(map(lambda price: str(price) ,prices ))
 prices_comp = [str(price) for price in prices]
 
+
 nums_filter = [1, 2, 3, 4, 5, 6]
 nums_filter_map = list(filter(lambda n: n % 2 ==0 , nums_filter))
 nums_filter_camp = [n  for n in nums_filter if n % 2 == 0]
 
+
 nums_f2 = [-3, -1, 0, 2, 5]
 nums_filter_f2 = list(filter(lambda  n: n > 0 , nums_f2))
 nums_filter_f2_comp = [n for n in nums_f2 if n > 0]
+print(nums_filter_f2)
 
 
 words_f3 = ["car", "", "  ", "house", "a"]
@@ -52,5 +55,4 @@ words_f3_filter_comp = [ word for word in words_f3 if len(word.strip()) > 0]
 
 values = [0, 1, "", "hello", None, False, True]
 values_result = list(filter(None ,values))
-print(values_result)
 

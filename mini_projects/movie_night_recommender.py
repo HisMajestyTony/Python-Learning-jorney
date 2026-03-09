@@ -89,7 +89,7 @@ class Library:
         return True
 
     def list_all(self):
-        return ", ".join([movie.short() for movie in self.movies])
+        return [movie.short() for movie in self.movies]
 
     def list_unwatched(self):
 
@@ -148,6 +148,9 @@ class Library:
 
 
     def longest_movie(self):
+        if not self.movies:
+            return None
+
         longest = max(self.movies, key=lambda m: m.minutes)
         return longest.short()
 
@@ -228,7 +231,7 @@ class Library:
 
 def main():
     lib = Library()
-    lib.load_from_file("movies.txt")
+
 
     while True:
         print("1 Add movie")
@@ -242,13 +245,14 @@ def main():
 
         if choice == "1":
             title = input("Please enter your movie's title:")
-            genre = [input("Please enter your movie's genre:")]
+            genre = [input("Please enter your movie's genre:").strip()]
             try:
                 year = int(input("Please enter your movie's year:"))
                 minutes = int(input("Please enter your movie's length:"))
                 rating = float(input("Please enter your movie's rating:"))
             except ValueError:
                 print("Invalid input")
+                continue
 
             movie = Movie(title,genre,year,minutes,rating)
             lib.add_movie(movie)
@@ -259,23 +263,68 @@ def main():
                 print("There is no movies to be listed")
                 continue
 
-            print(lib.list_all())
+            for movie in lib.movies:
+                print(movie.short())
 
         elif choice =="3":
-            title = input("Please enter the name of the movie you have watched: ").strip()
-            if not lib:
+            if not lib.movies:
                 print("The list is empty")
-                lib.mark_watched_by_title(title)
+                continue
 
-            print(f"You just marked {title} as watched!")
+            title = input("Please enter the name of the movie you have watched: ").strip()
+
+            if lib.mark_watched_by_title(title):
+                print(f"You just marked {title} as watched!")
+            else:
+                print("Movie not found")
 
 
         elif choice == "4":
-            pass
+
+
+            genre = input("Genre (Press enter to skip): ").strip()
+            if genre == "":
+                genre = None
+
+            max_minutes = input("Max minutes (Press enter to skip): ")
+            if max_minutes == "":
+                max_minutes = None
+            else:
+                max_minutes = int(max_minutes)
+
+            min_rating = input("Minimum rating (Press enter to skip): ")
+            if min_rating == "":
+                min_rating = None
+            else:
+                min_rating = float(min_rating)
+
+            only_unwatched = input("Only unwatched? (Enter=yes / n=no): ").strip().lower()
+
+            if only_unwatched == "":
+                only_unwatched = True
+            elif only_unwatched in ("n", "no", "false"):
+                only_unwatched = False
+            else:
+                only_unwatched = True
+
+            top_n = input("How many movies you want me to recommend ? (Press enter to skip))")
+            if top_n == "":
+                top_n = 5
+            else :
+                top_n = int(top_n)
+
+
+            result =lib.recommend(genre,max_minutes,min_rating,only_unwatched,top_n)
+
+            if not result:
+                print("No matching movies found")
+            else:
+                for movie in result:
+                    print(movie)
 
 
         elif choice  == "5":
-            pass
+            print(lib.export_stats())
 
 
         elif choice == "6":
@@ -283,37 +332,6 @@ def main():
 
         else:
             print("Invalid option")
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#lib = Library()
-
-# m1 = Movie("Interstellar", ["Sci-Fi"], 2014, 169, 8.6)
-# m2 = Movie("Inception", ["Action"], 2010, 148, 8.8)
-# m3 = Movie("Gladiator", ["Action"], 2000, 111, 10.0)
-# m4 = Movie("Catch me if you can", ["Drama"], 2005, 128, 6.8)
-# m5 = Movie("The girl next door", ["Comedy"], 2016, 140, 2.8)
-# m6 = Movie("The girl next door 2", ["Comedy"], 2016, 140, 2.8)
-#
-# lib.add_movie(m1)
-# lib.add_movie(m2)
-# lib.add_movie(m3)
-# lib.add_movie(m4)
-# lib.add_movie(m5)
-# lib.add_movie(m6)
 
 
 

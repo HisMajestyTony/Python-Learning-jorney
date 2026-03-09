@@ -1,1 +1,5 @@
 Grandfather|Sex|1992|200|10.0|False
+Godfather|Drama|1974|120|10.0|True
+Gospodin za edin den|Comedy|1960|90|6.0|False
+Avatar|action|2010|205|7.8|False
+American Pie|Comedy|2001|92|5.6|False
