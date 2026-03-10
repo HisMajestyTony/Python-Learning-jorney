@@ -22,6 +22,35 @@ class Transaction:
         return f"{self.amount} euro * {self.category} * ({self.date}) | {self.transaction_type} - {self.note}"
 
 
+def prompt_transaction(transaction_type):
+    try:
+        amount = float(input("Enter amount: "))
+    except ValueError:
+        print("Invalid input")
+        return None
+    if amount <= 0:
+        print("Amount cannot be negative or 0")
+        return None
+
+    category = input("Enter category: ").strip()
+    if not category:
+        print("Category cannot be empty")
+        return None
+
+
+    date = input("Enter date: ")
+
+    try:
+        datetime.date.fromisoformat(date)
+    except ValueError:
+        print("Date format must be as follows YYYY-MM-DD")
+        return None
+
+    note = input("Enter note: ").strip()
+
+
+    return Transaction(amount, category, date, transaction_type, note)
+
 
 class FinanceTracker:
 
@@ -32,11 +61,18 @@ class FinanceTracker:
 
 
     def add_transaction(self, transaction):
+        if not isinstance(transaction, Transaction):
+            return False
+
+
         self.transactions.append(transaction)
         self.save_to_file("transactions.txt")
-
         return "Transaction added"
 
+
+
+    def delete_transaction(self,index):
+        self.transactions.pop(index)
 
 
 
@@ -44,7 +80,7 @@ class FinanceTracker:
         if not self.transactions:
             return []
 
-        return [transaction.display() for transaction in self.transactions]
+        return self.transactions
 
 
 
@@ -102,75 +138,42 @@ def main():
         print("4) Show total income")
         print("5) Show total expense")
         print("6) Balance")
+        print("7) Delete transaction+")
         print("0) Exit")
 
 
         option = input("Please select your option:")
 
         if option == "1":
+            transaction = prompt_transaction("income")
 
-            try:
-
-                amount = float(input("Please enter the amount of your transaction: "))
-            except ValueError:
-                print("Invalid input")
+            if transaction is None:
                 continue
-
-            category_tran = input("Please enter the category of your transaction: ").strip()
-
-            try:
-                date = input("Please enter the date of your transaction: ")
-                datetime.date.fromisoformat(date)
-            except ValueError:
-                print("Incorrect data format, should be YYYY-MM-DD")
-                continue
-
-
-
-
-            transaction_type = "income"
-            note = input("Please enter an additional note or skip by pressing enter: ")
-
-            transaction = Transaction(amount, category_tran,date,transaction_type,note)
 
             transaction_list.add_transaction(transaction)
-
             print("Transaction is added to the file")
 
+
+
         elif option == "2":
-                try:
 
-                    amount = float(input("Please enter the amount of your transaction: "))
-                except ValueError:
-                    print("Invalid input")
-                    continue
+               transaction = prompt_transaction("expense")
 
-                category_tran = input("Please enter the category of your transaction: ").strip()
+               if transaction is None:
+                   continue
 
+               transaction_list.add_transaction(transaction)
+               print("Transaction is added to the file")
 
-                try:
-                    date = input("Please enter the date of your transaction: ")
-                    datetime.date.fromisoformat(date)
-                except ValueError:
-                    print("Incorrect data format, should be YYYY-MM-DD")
-                    continue
-
-                transaction_type = "expense"
-                note = input("Please enter an additional note or skip by pressing enter: ")
-
-                transaction = Transaction(amount, category_tran, date, transaction_type, note)
-
-                transaction_list.add_transaction(transaction)
-
-                print("Transaction is added to the file")
 
         elif option == "3":
             if not transaction_list.transactions:
                 print("The list is empty")
                 continue
 
-            for transaction in transaction_list.transactions:
-                print(transaction.display())
+            for i , transaction in enumerate(transaction_list.list_transactions(), start=1):
+                print(i , transaction.display())
+
 
         elif option == "4":
             print(transaction_list.total_income())
@@ -179,6 +182,28 @@ def main():
             print(transaction_list.total_expenses())
         elif option == "6":
             print(transaction_list.balance())
+        elif option == "7":
+
+            try:
+                index = int(input("Please enter the number of the transaction you are willing to delete: "))
+            except ValueError:
+                print("Invalid input")
+                continue
+            if index > len(transaction_list.transactions):
+                print("Invalid index")
+                continue
+            if index < 0:
+                print("Invalid index")
+                continue
+            double_check = input("Are you sure that you want to delete this transaction ? Please select y or n").strip()
+
+            if double_check == "n":
+                continue
+            else:
+                transaction_list.delete_transaction(index -1)
+                transaction_list.save_to_file("transactions.txt")
+                print("Transaction deleted successfully")
+
 
 
         elif option == "0":
@@ -212,7 +237,13 @@ if __name__ == "__main__":
 
 
 
-
+# filter by income/expense
+#
+# filter by category
+#
+# monthly summary
+#
+# search by keyword in note/category
 
 
 
