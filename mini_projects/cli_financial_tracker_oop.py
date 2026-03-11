@@ -52,6 +52,9 @@ def prompt_transaction(transaction_type):
     return Transaction(amount, category, date, transaction_type, note)
 
 
+
+
+
 class FinanceTracker:
 
     def __init__(self):
@@ -113,12 +116,21 @@ class FinanceTracker:
 
         return result
 
-    def monthly_summary(self,date):
-        result = list(filter(lambda d: date in d.date , self.transactions))
-        ## NOT WORKING IN FULL
+    def monthly_summary(self):
+        summary = {}
 
-        return result
+        for t in self.transactions:
+            month = t.date[:7]
 
+            if month not in summary:
+                summary[month] = {"income": 0, "expense": 0}
+
+            if t.transaction_type.lower() == "income":
+                summary[month]["income"] += t.amount
+            elif t.transaction_type.lower() == "expense":
+                summary[month]["expense"] += t.amount
+
+        return summary
 
 
 
@@ -127,6 +139,15 @@ class FinanceTracker:
             for transaction in self.transactions:
                 f.write(transaction.to_file_string())
                 f.write("\n")
+
+    def search_by_keyword(self,keyword):
+        result = list(filter(lambda k: keyword.lower() in k.note.lower() or keyword.lower() in k.category.lower(), self.transactions))
+
+        if not result:
+            return None
+
+        return result
+
 
 
     def load_from_file(self,filename):
@@ -165,6 +186,7 @@ def main():
         print("8) Filter by transaction type (expense / income): ")
         print("9) Filter by category: ")
         print("10) Monthly summary")
+        print("11) Search by keyword")
         print("0) Exit")
 
 
@@ -262,12 +284,38 @@ def main():
                 print(i, transaction.display())
 
         elif option == "10":
-            user_date = input("Please enter year and month in the following format YYYY-MM").strip()
+            result = transaction_list.monthly_summary()
+
+            if not result:
+                print("No transactions found")
+                continue
+
+            for month in sorted(result):
+                income = result[month]["income"]
+                expense = result[month]["expense"]
+                balance = income - expense
+
+                print(month)
+                print("Income:", income)
+                print("Expense:", expense)
+                print("Balance:", balance)
+                print()
 
 
-            for i, transaction in enumerate(transaction_list.monthly_summary(user_date), start=1):
+        elif option == "11":
+            user_keyword = input("Please enter your keyword: ").strip().lower()
+            if user_keyword == "":
+                print("Keyword cannot be empty")
+                continue
+
+            result = transaction_list.search_by_keyword(user_keyword)
+
+            if not result:
+                print("There is no match")
+                continue
+
+            for i, transaction in enumerate(transaction_list.search_by_keyword(user_keyword), start=1):
                 print(i, transaction.display())
-
 
         elif option == "0":
             break
