@@ -1,1 +1,5 @@
 300000.0|Zaplatka|1111-11-11|income|nmea
+11111111.0|nema|1111-11-11|income|none
+3000.0|neshto|1111-11-22|income|asd
+111111.0|expense|1111-11-11|expense|asdasda
+33333333.0|kurvi|2026-12-12|expense|YOK

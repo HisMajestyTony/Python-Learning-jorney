@@ -99,6 +99,29 @@ class FinanceTracker:
 
         return income - expenses
 
+    def filter_by_income_or_expense(self,transaction_type):
+        return [
+            t for t in self.transactions
+            if t.transaction_type.lower() == transaction_type.lower()
+        ]
+
+    def filter_by_category(self,category):
+        result = list(filter(lambda c: c.category.lower() == category.lower(), self.transactions))
+
+        if not result:
+            return None
+
+        return result
+
+    def monthly_summary(self,date):
+        result = list(filter(lambda d: date in d.date , self.transactions))
+        ## NOT WORKING IN FULL
+
+        return result
+
+
+
+
     def save_to_file(self,filename):
         with open (filename , "w" , encoding="utf-8") as f:
             for transaction in self.transactions:
@@ -139,6 +162,9 @@ def main():
         print("5) Show total expense")
         print("6) Balance")
         print("7) Delete transaction+")
+        print("8) Filter by transaction type (expense / income): ")
+        print("9) Filter by category: ")
+        print("10) Monthly summary")
         print("0) Exit")
 
 
@@ -204,6 +230,43 @@ def main():
                 transaction_list.save_to_file("transactions.txt")
                 print("Transaction deleted successfully")
 
+        elif option == "8":
+
+
+
+
+            user_input = input("Please type expense or income: ").strip().lower()
+
+            if user_input not in ["expense", "income"]:
+                print("Invalid input")
+                continue
+
+            result = transaction_list.filter_by_income_or_expense(user_input)
+
+            for i, transaction in enumerate(result, start=1):
+                print(i, transaction.display())
+
+
+        elif option == "9":
+            user_input = input("Please enter your category: ").strip()
+            validation = []
+
+            for transaction in transaction_list.transactions:
+                if transaction.category.lower() == user_input.lower():
+                    validation.append(transaction)
+            if not validation:
+                print("There is no such category!")
+                continue
+
+            for i, transaction in enumerate(transaction_list.filter_by_category(user_input), start=1):
+                print(i, transaction.display())
+
+        elif option == "10":
+            user_date = input("Please enter year and month in the following format YYYY-MM").strip()
+
+
+            for i, transaction in enumerate(transaction_list.monthly_summary(user_date), start=1):
+                print(i, transaction.display())
 
 
         elif option == "0":
