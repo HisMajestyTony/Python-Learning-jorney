@@ -57,18 +57,5 @@ values = [0, 1, "", "hello", None, False, True]
 values_result = list(filter(None ,values))
 
 
-transactions = [
-    ("2026-01", "income", 2000),
-    ("2026-01", "expense", 500),
-    ("2026-02", "income", 2200),
-    ("2026-02", "expense", 700),
-]
 
-
-tr = {}
-
-for i in transactions:
-    tr[i] = {i[0]:i[1]}
-
-print(tr)
 
