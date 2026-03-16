@@ -128,5 +128,32 @@ prices = {
 "orange": 3
 }
 
-##TO BE CONTINUE DICTIONARIES IN PYTHON 
+def transform_existing_dicts(prices):
+    return {product: price * 2 for product, price in prices.items()}
+
+#EX4 (I USED HELP FROM GPT FOR THIS ONE )
+transactions1 = [
+("food", 20),
+("rent", 500),
+("food", 15)
+]
+
+def indexing(transactions):
+    result = {index: transaction for index, transaction in enumerate(transactions)}
+
+    return dict(result)
+
+
+
+
+#EX5
+months = ["2026-01","2026-02","2026-03"]
+
+def fin_track_ext_dict(months):
+    return {month: {"income": 0, "expense": 0} for month in months}
+
+
+
+
+
 

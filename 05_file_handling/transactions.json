@@ -1,0 +1,18 @@
+[
+    {
+        "type": "income",
+        "amount": 2000
+    },
+    {
+        "type": "expense",
+        "amount": 500
+    },
+    {
+        "type": "expense",
+        "amount": 300
+    },
+    {
+        "type": "income",
+        "amount": 1000
+    }
+]
