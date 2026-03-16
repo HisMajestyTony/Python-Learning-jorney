@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 
 class Transaction:
@@ -117,18 +118,17 @@ class FinanceTracker:
         return result
 
     def monthly_summary(self):
-        summary = {}
+        summary = defaultdict(lambda: {"income": 0, "expense": 0})
 
-        for t in self.transactions:
-            month = t.date[:7]
+        for transaction in self.transactions:
+            month = transaction.date[:7]
+            t_type = transaction.transaction_type.lower()
+            amount = transaction.amount
 
-            if month not in summary:
-                summary[month] = {"income": 0, "expense": 0}
+            summary[month][t_type] += amount
 
-            if t.transaction_type.lower() == "income":
-                summary[month]["income"] += t.amount
-            elif t.transaction_type.lower() == "expense":
-                summary[month]["expense"] += t.amount
+        for month in summary:
+            summary[month]["balance"] = summary[month]["income"] - summary[month]["expense"]
 
         return summary
 
@@ -322,6 +322,8 @@ def main():
 
         else:
             print("Invalid input")
+
+
 
 
 if __name__ == "__main__":
