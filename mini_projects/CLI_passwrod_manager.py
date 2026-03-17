@@ -29,9 +29,9 @@ def setup_master_password(data):
         hashed_pass = hash_text(master_pass)
         data["master_password_hash"] = hashed_pass
         save_data(data)
-        return print("Password saved")
+        return True
     else:
-        return print("Invalid password")
+        return False
 
 
 def verify_master_password(data):
@@ -56,13 +56,16 @@ def verify_master_password(data):
         if tries == 0:
             return False
 
-    return True
+    return False
 
 def add_service(data):
     service = input("Enter service name: ").strip().lower()
     username = input("Enter username: ").strip()
     password = input("Enter password: ").strip()
     note = input("Enter note: ").strip()
+
+    if service in data["services"]:
+        return print("Service already exists")
 
 
     data["services"][service] = {
@@ -71,7 +74,7 @@ def add_service(data):
         "note": note
     }
     save_data(data)
-    print("Service was saved successfully")
+    return print("Service was saved successfully")
 
 def view_services(data):
     if not data["services"]:
@@ -102,15 +105,24 @@ def get_service_details(data):
     return print(text)
 
 def delete_service(data):
-    name = input("Please enter the service you wish to delete: ").strip().lower()
+    name = input("Enter the service you wish to delete: ").strip().lower()
 
     if name not in data["services"]:
         return print("Service not found")
 
     else:
-        data["services"].pop(name)
-        save_data(data)
-        return print("Service deleted successfully")
+        double_check = input("Are you sure you are wiling to delete this service ? (yes / no)").strip().lower()
+
+        if double_check == "yes":
+            data["services"].pop(name)
+            save_data(data)
+            return print("Service deleted successfully")
+        elif double_check == "no":
+            return False
+        else :
+            return print("Invalid input")
+
+
 
 
 
@@ -120,14 +132,14 @@ def menu():
     data = load_data()
 
     if data["master_password_hash"] == "":
-        setup_master_password(data)
-
+        if not setup_master_password(data):
+            return print("Access denied")
 
     else:
-        if verify_master_password(data):
-            print("Access granted")
-        else:
+        if not verify_master_password(data):
             return print("Access denied")
+        else:
+            print("Access granted")
 
 
 
