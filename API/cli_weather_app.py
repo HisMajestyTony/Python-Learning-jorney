@@ -1,8 +1,5 @@
 
 import os
-from json import JSONDecodeError
-from traceback import print_tb
-
 from dotenv import load_dotenv
 import requests
 import json
@@ -38,10 +35,25 @@ def get_weather(city_name):
 
     try:
         response = requests.get(url, params=params)
-        return response.json()
+        data = response.json()
+
+        if "error" in data:
+            return {
+                "error": {
+                    "type": "api",
+                    "message": data["error"]["message"]
+                }
+            }
+
+        return data
 
     except requests.exceptions.RequestException:
-        return {"error": {"message": "Network error. Please try again."}}
+        return {
+            "error": {
+                "type": "network",
+                "message": "Network error. Please try again."
+            }
+        }
 
 def display_weather(data, unit="C"):
     city = data["location"]["name"]
@@ -89,7 +101,44 @@ def display_forecast(data, unit="C"):
         print(f"Minimum temperature: {day['day'][temp_min_key]}{symbol}")
         print(f"Condition: {day['day']['condition']['text']}")
 
+def add_to_history(history, city_name):
+    if city_name in history["history"]:
+        history["history"].remove(city_name)
 
+    history["history"].insert(0, city_name)
+
+    history["history"] = history["history"][:3]
+
+def c_or_f(unit):
+    if unit not in ["C", "F"]:
+        unit = "C"
+    return unit
+
+
+def show_history(history):
+    print("---HISTORY---")
+
+    for i, city in enumerate(history["history"], 1):
+         print(f"{i}) {city}")
+    print("---------------")
+
+def is_history_empty(history):
+    if not history["history"]:
+        return True
+    return False
+
+def index_validation(index, history):
+
+    try:
+        index = int(index)
+
+    except ValueError:
+        return False
+
+    if index < 1 or index > len(history["history"]):
+        return False
+
+    return True
 
 
 
@@ -101,57 +150,106 @@ def main():
     if "history" not in history:
         history["history"] = []
 
-
+    if  history["history"]:
+        show_history(history)
 
     while True:
 
 
-        print("1. Enter city name")
-        print("2. TODO")
+
+        print("1. Enter city name: ")
+        print("2. History")
+        print("3. Clear history")
         print("0. Exit")
 
 
-        options = input("Please select an option")
+        option = input("Please select an option: ")
 
-        choice = input("Do you wish to save to history? (y / n)").strip().lower()
-        if choice == "y":
-            save_history(history)
-            print("History saved")
-        elif choice == "n":
-            continue
-        else:
-            print("Invalid input")
-
-        if options == "1":
+        if option == "1":
             city_name = input("Please enter city name: ").strip()
-            if city_name in history["history"]:
-                history["history"].remove(city_name)
-                history["history"].insert(0, city_name)
-            else:
-                history["history"].insert(0 ,city_name)
 
-            if len(history["history"]) > 3:
-                history["history"].pop()
+            cancelled = False
 
-            data = get_weather(city_name)
+            while True:
+                data = get_weather(city_name)
 
-            if "error" in data:
+                if "error" not in data:
+                    break
+
                 print("Error:", data["error"]["message"])
+
+                if data["error"]["type"] == "network":
+                    retry = input("Retry request? (y / n): ").strip().lower()
+                    if retry == "y":
+                        continue
+
+                if data["error"]["type"] == "api":
+                    city_name = input("Please enter city name: ").strip()
+                    continue
+
+                cancelled = True
+                break
+
+            if cancelled:
                 continue
 
             unit = input("Choose unit (C/F): ").strip().upper()
+            unit = c_or_f(unit)
 
-            if unit not in ["C", "F"]:
-                unit = "C"
+            choice = input("Do you wish to save to history? (y / n)").strip().lower()
+
+            if choice == "y":
+                add_to_history(history, city_name)
+                save_history(history)
+                print("History saved")
+            elif choice != "n":
+                print("Invalid input")
 
             display_weather(data, unit)
+            display_forecast(data, unit)
+
+        elif option == "2":
+            if is_history_empty(history):
+                print("History is empty")
+                continue
+
+            show_history(history)
+
+            index = input("Please select city: ").strip()
+            validation = index_validation(index, history)
+
+            if validation:
+                city_name = history["history"][int(index) - 1]
+
+            else :
+                print("Invalid input")
+                continue
+            data = get_weather(city_name)
+
+            unit = input("Choose unit (C/F): ").strip().upper()
+            unit = c_or_f(unit)
+
+            display_weather(data,unit)
             display_forecast(data,unit)
 
+        elif option == "3":
+            if not history["history"]:
+                print("History is empty")
+                continue
+
+            confirmation = input("Are you sure that you want to delete history? (y / n)").strip().lower()
+            if confirmation == "y":
+                history["history"] = []
+                save_history(history)
+                print("History deleted")
+            elif confirmation == "n":
+                continue
+            else:
+                print("Invalid input")
 
 
 
-
-        elif options == "0":
+        elif option == "0":
             break
 
         else:
@@ -165,8 +263,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
