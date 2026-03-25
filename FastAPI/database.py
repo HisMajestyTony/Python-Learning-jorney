@@ -1,14 +1,18 @@
-import json
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATA_FILE = "users.json"
+DATABASE_URL = "sqlite:///./users.db"
 
-def load_users():
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+
+def get_db():
+    db = SessionLocal()
     try:
-        with open(DATA_FILE, "r") as file:
-            return json.load(file)
-    except:
-        return []
-
-def save_users(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+        yield db
+    finally:
+        db.close()

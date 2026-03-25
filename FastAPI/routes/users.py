@@ -1,20 +1,20 @@
 from fastapi import APIRouter, HTTPException
-from models import User, MessageResponse, UserUpdate, CountResponse
+from models.user_model import User, MessageResponse, UserUpdate, CountResponse
 from services.user_service import (
     get_all_users,
     find_user_by_name,
     search_users,
     create_user,
     delete_user,
-    update_age, oldest_user, get_users_count, get_filtered_by_age, get_sort_users
+    update_age, oldest_user, get_users_count,  get_sort_users, get_age_range, get_users_paginated
 )
 
 router = APIRouter(prefix="/users")
 
 
 @router.get("/", response_model=list[User])
-def get_users():
-    return get_all_users()
+def get_users(skip: int = 0, limit: int = 10):
+    return get_users_paginated(skip, limit)
 
 
 @router.get("/count", response_model=CountResponse)
@@ -41,14 +41,14 @@ def get_oldest_user():
 
     return ancient_user
 
+
 @router.get("/filter", response_model=list[User])
-def filtered_by_age(age: int):
-    users = get_filtered_by_age(age)
+def filter_users(min_age: int, max_age: int):
+    try:
+        return get_age_range(min_age, max_age)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    if not users:
-        raise HTTPException(status_code=404, detail="There are no users older than minimum requested age")
-
-    return users
 
 @router.get("/sort", response_model=list[User])
 def sort_users(order: str = "asc"):
@@ -102,13 +102,10 @@ def update_user(name: str, data: UserUpdate):
 
 @router.post("/", status_code=201, response_model=MessageResponse)
 def add_user(user: User):
-    if not user.name.strip():
-        raise HTTPException(status_code=400, detail="Name cannot be empty")
-
-    result = create_user(user)
-
-    if not result:
-        raise HTTPException(status_code=400, detail="User already exists")
+    try:
+        create_user(user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return {"message": "User added"}
 

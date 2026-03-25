@@ -25,7 +25,7 @@ def create_user(user):
 
     for u in users:
         if u["name"].lower() == user.name.lower():
-            return None
+            raise ValueError("User already exists")
 
     users.append(user.dict())
     save_users(users)
@@ -59,6 +59,9 @@ def oldest_user():
 
     old_user = max(users, key=lambda u: u["age"])
 
+    if not old_user:
+        return None
+
     return old_user
 
 def get_users_count():
@@ -66,14 +69,28 @@ def get_users_count():
     return len(users)
 
 
-def get_filtered_by_age(age: int):
-    users = load_users()
-    return list(filter(lambda u: u["age"] >= age, users))
-
 def get_sort_users(order: str):
     users = load_users()
 
     if order == "asc":
         return sorted(users, key=lambda user: user["age"])
+    elif order =="desc":
+        return sorted(users, key=lambda user: user["age"], reverse=True)
 
-    return sorted(users, key=lambda user: user["age"], reverse=True)
+    else:
+        raise ValueError("Order must be 'asc' or 'desc'")
+
+
+
+def get_age_range(min_age: int, max_age: int):
+    if min_age > max_age:
+        raise ValueError("min_age cannot be greater than max_age")
+
+    users = load_users()
+
+    return list(filter(lambda u: min_age <= u["age"] <= max_age, users))
+
+
+def get_users_paginated(skip: int, limit: int):
+    users = load_users()
+    return users[skip: skip + limit]
