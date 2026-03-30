@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import  HTTPException
 
 from db_models.user_table import UserTable
+from db_models.book_table import BookTable
 from schemas import UserCreate
 
 
@@ -39,7 +40,7 @@ def get_user_by_id(db: Session, user_id):
 
     return {"id": user.id, "name": user.name, "age": user.age}
 
-def del_user_by_id(db: Session, user_id):
+def del_user_by_id(db: Session, user_id: int):
     user = db.query(UserTable).filter(UserTable.id == user_id).first()
 
     if not user:
@@ -48,5 +49,34 @@ def del_user_by_id(db: Session, user_id):
     db.delete(user)
     db.commit()
 
-    return {"User deleted"}
+    return {"message": "User deleted"}
+
+def get_update_user(db: Session, user_id: int, updated_user: UserCreate):
+    user = db.query(UserTable).filter(UserTable.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.name = updated_user.name
+    user.age = updated_user.age
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "age": user.age
+    }
+
+def get_version():
+    return "v1.0"
+
+
+
+
+
+
+
+
 
