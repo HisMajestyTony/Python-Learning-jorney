@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends , HTTPException
 from sqlalchemy.orm import Session
 from database_config import get_dbs
-from tm_services.dbs_service import create_task, get_all_tasks, get_single_task, update_task, delete_task
-from tm_shcemas.tm_schemas import TaskCreate, TaskUpdate, TaskResponse, TaskDeletedResponse
-
-
+from tm_services.dbs_service import create_task, get_all_tasks, get_single_task, update_task, delete_task, \
+    create_category
+from tm_shcemas.tm_schemas import TaskCreate, TaskUpdate, TaskResponse, TaskDeletedResponse, CategoryResponse, \
+    CategoryCreate
 
 router = APIRouter()
 
@@ -12,6 +12,13 @@ router = APIRouter()
 def create_task_route(task: TaskCreate, dbs: Session = Depends(get_dbs)):
     try:
        return create_task(dbs, task)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/categories", response_model=CategoryResponse, status_code=201)
+def add_category(category: CategoryCreate, dbs: Session = Depends(get_dbs)):
+    try:
+        return create_category(dbs, category)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
